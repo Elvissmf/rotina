@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.elvissmf.rotina",
+      "sha256_cert_fingerprints": [
+        "53:70:2D:C7:7B:66:86:C8:83:C3:1E:70:52:FE:85:89:1D:1F:9F:7E:21:AE:FA:8A:34:08:E1:A5:96:4F:8A:A0"
+      ]
+    }
+  }
+]
