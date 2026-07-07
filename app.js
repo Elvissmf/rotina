@@ -32,9 +32,50 @@ function migrateCategory(cat) {
   return LEGACY_CATEGORY_MAP[cat] || "tarefas";
 }
 
-// O ícone de um hábito é sempre o da sua categoria (campo habit.icon antigo
-// pode existir no objeto salvo, mas é ignorado — sem migração destrutiva)
+// =====================================================================
+// Emojis — imagens JoyPixels locais (pasta emoji/): visual idêntico em
+// todos os aparelhos e sempre colorido (o Windows renderiza emojis de
+// sistema em preto-e-branco em alguns contextos)
+// =====================================================================
+
+// Nome de arquivo JoyPixels: codepoints em hex, sem o variation selector FE0F
+function emojiFile(ch) {
+  const cps = [];
+  for (const c of ch) {
+    const cp = c.codePointAt(0);
+    if (cp !== 0xfe0f) cps.push(cp.toString(16));
+  }
+  return cps.join("-") + ".png";
+}
+
+// <img> decorativa do emoji (alt vazio — o texto ao lado descreve)
+function emojiImg(ch, cls) {
+  return `<img class="emoji${cls ? " " + cls : ""}" src="emoji/${emojiFile(ch)}" alt="" draggable="false">`;
+}
+
+// Grade do seletor de ícone do hábito. Todo emoji daqui (e todo ícone de
+// categoria) precisa ter o PNG correspondente em emoji/ — o SW faz precache.
+const EMOJI_SET = [
+  // Saúde e exercício
+  "💪", "🏃", "🚶", "🏋️", "🚴", "🏊", "🧘", "🤸", "⚽", "🏀", "🎾", "🥋",
+  "😴", "🛌", "🚿", "🧼", "🦷", "💊", "🩺", "🍎", "🥗", "🥦", "🍳", "💧", "🚭", "📵",
+  // Estudo e trabalho
+  "📖", "📚", "✍️", "📝", "💻", "🖥️", "📊", "📈", "💼", "🗂️", "📅", "⏰",
+  "🎯", "🧠", "🗣️", "🎧", "🎓", "✏️", "📐", "🔬", "🌍",
+  // Casa e família
+  "🏠", "🧹", "🧺", "🍽️", "🛒", "🐶", "🐱", "👪", "❤️", "📞", "🎁",
+  // Dinheiro
+  "💰", "💵", "🏦", "💳", "🪙", "📉",
+  // Bem-estar e lazer
+  "🙏", "🎨", "🎸", "🎹", "🎮", "✈️", "🚗", "🌞", "🌙", "⭐", "🔥", "🍀",
+  "🌊", "☕", "🍵", "🎬", "📷", "🌱", "🌳", "✅",
+];
+
+// Ícone do hábito: emoji escolhido pelo usuário (campo habit.emoji, validado
+// contra EMOJI_SET) ou, na ausência, o da categoria. O campo habit.icon
+// antigo segue ignorado — sem migração destrutiva.
 function iconForHabit(habit) {
+  if (typeof habit.emoji === "string" && EMOJI_SET.includes(habit.emoji)) return habit.emoji;
   const cat = categoryById(habit.category);
   return cat ? cat.icon : "✅";
 }
@@ -56,20 +97,21 @@ function migrateColor(color) {
   return LEGACY_COLOR_MAP[color] || DEFAULT_COLOR;
 }
 
-// Biblioteca de hábitos prontos (categorias já no vocabulário novo)
+// Biblioteca de hábitos prontos (categorias já no vocabulário novo).
+// emoji = ícone escolhido do EMOJI_SET, herdado pelo hábito ao adicionar.
 const LIBRARY = [
-  { name: "Beber água", icon: "💧", category: "saude", color: "#38BDF8" },
-  { name: "Correr", icon: "🏃", category: "saude", color: "#4ADE80" },
-  { name: "Meditar", icon: "🧘", category: "saude", color: "#7C5CFC" },
-  { name: "Ler", icon: "📖", category: "tarefas", color: "#F472B6" },
-  { name: "Comer saudável", icon: "🥗", category: "saude", color: "#4ADE80" },
-  { name: "Dormir cedo", icon: "😴", category: "saude", color: "#7C5CFC" },
-  { name: "Escrever no diário", icon: "✍️", category: "tarefas", color: "#FBBF24" },
-  { name: "Escovar os dentes", icon: "🦷", category: "saude", color: "#38BDF8" },
-  { name: "Planejar o dia", icon: "🎯", category: "profissional", color: "#FF8A5C" },
-  { name: "Tomar vitaminas", icon: "💊", category: "saude", color: "#F472B6" },
-  { name: "Caminhar", icon: "🚶", category: "saude", color: "#4ADE80" },
-  { name: "Menos celular", icon: "📵", category: "tarefas", color: "#FF8A5C" },
+  { name: "Beber água", emoji: "💧", category: "saude", color: "#38BDF8" },
+  { name: "Correr", emoji: "🏃", category: "saude", color: "#4ADE80" },
+  { name: "Meditar", emoji: "🧘", category: "saude", color: "#7C5CFC" },
+  { name: "Ler", emoji: "📖", category: "tarefas", color: "#F472B6" },
+  { name: "Comer saudável", emoji: "🥗", category: "saude", color: "#4ADE80" },
+  { name: "Dormir cedo", emoji: "😴", category: "saude", color: "#7C5CFC" },
+  { name: "Escrever no diário", emoji: "✍️", category: "tarefas", color: "#FBBF24" },
+  { name: "Escovar os dentes", emoji: "🦷", category: "saude", color: "#38BDF8" },
+  { name: "Planejar o dia", emoji: "🎯", category: "profissional", color: "#FF8A5C" },
+  { name: "Tomar vitaminas", emoji: "💊", category: "saude", color: "#F472B6" },
+  { name: "Caminhar", emoji: "🚶", category: "saude", color: "#4ADE80" },
+  { name: "Menos celular", emoji: "📵", category: "tarefas", color: "#FF8A5C" },
 ];
 
 const XP_PER_MINUTE = 1;
@@ -108,6 +150,13 @@ function normalizeForest(raw) {
   return { sessions, totalXP, xpByCategory };
 }
 
+// Valida recurrence: array de índices 0–6; qualquer outra coisa vira []
+// ([] = todos os dias — mesmo fallback que o isScheduled já usa)
+function normalizeRecurrence(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((d) => Number.isInteger(d) && d >= 0 && d <= 6);
+}
+
 // Valida hábitos e migra categorias antigas (função pura, idempotente)
 function normalizeHabits(raw) {
   if (!Array.isArray(raw)) return [];
@@ -116,7 +165,22 @@ function normalizeHabits(raw) {
     .map((h) => Object.assign({}, h, {
       category: migrateCategory(h.category),
       color: migrateColor(h.color),
+      recurrence: normalizeRecurrence(h.recurrence),
+      emoji: typeof h.emoji === "string" && EMOJI_SET.includes(h.emoji) ? h.emoji : null,
     }));
+}
+
+// Valida completions: mantém só entradas cujo valor é um array de ids string
+// (um backup malformado aqui quebrava o render inteiro com TypeError)
+function normalizeCompletions(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out = {};
+  for (const [key, val] of Object.entries(raw)) {
+    if (!Array.isArray(val)) continue;
+    const ids = val.filter((id) => typeof id === "string");
+    if (ids.length) out[key] = ids;
+  }
+  return out;
 }
 
 // Valida/normaliza um JSON bruto; retorna null se corrompido (função pura)
@@ -125,10 +189,7 @@ function parseState(raw) {
   try {
     const data = JSON.parse(raw);
     if (!data || typeof data !== "object" || !Array.isArray(data.habits)) return null;
-    const completions =
-      data.completions && typeof data.completions === "object" && !Array.isArray(data.completions)
-        ? data.completions
-        : {};
+    const completions = normalizeCompletions(data.completions);
     const settings =
       data.settings && typeof data.settings === "object" ? data.settings : {};
     if (!Array.isArray(settings.notified)) settings.notified = [];
@@ -465,7 +526,7 @@ function buildCategoryPicker(containerId, onSelect) {
     btn.dataset.category = cat.id;
     btn.style.setProperty("--cat-color", cat.color);
     btn.style.setProperty("--cat-tint", cat.tint);
-    btn.innerHTML = `<span aria-hidden="true">${cat.icon}</span>${cat.label}`;
+    btn.innerHTML = `${emojiImg(cat.icon)}${cat.label}`;
     btn.addEventListener("click", () => onSelect(cat.id));
     picker.appendChild(btn);
   }
@@ -615,7 +676,7 @@ function renderDayStrip() {
 function renderFilterChips(containerId, selectedId, onSelect) {
   const container = document.getElementById(containerId);
   container.innerHTML = "";
-  const chips = [{ id: "todos", label: "Todos", icon: "", color: "#7C5CFC", tint: "#EDE7FE" }].concat(CATEGORIES);
+  const chips = [{ id: "todos", label: "Todos", icon: "", color: "#6E4CF0", tint: "#EDE7FE" }].concat(CATEGORIES);
 
   chips.forEach((cat) => {
     const btn = document.createElement("button");
@@ -624,7 +685,7 @@ function renderFilterChips(containerId, selectedId, onSelect) {
     btn.setAttribute("aria-pressed", String(selectedId === cat.id));
     btn.style.setProperty("--cat-color", cat.color);
     btn.style.setProperty("--cat-tint", cat.tint);
-    btn.innerHTML = cat.icon ? `<span aria-hidden="true">${cat.icon}</span>${cat.label}` : cat.label;
+    btn.innerHTML = cat.icon ? `${emojiImg(cat.icon)}${cat.label}` : cat.label;
     btn.addEventListener("click", () => onSelect(cat.id));
     container.appendChild(btn);
   });
@@ -645,11 +706,11 @@ function habitCard(habit) {
   const icon = document.createElement("div");
   icon.className = "habit-icon";
   icon.setAttribute("aria-hidden", "true");
-  icon.textContent = iconForHabit(habit);
+  icon.innerHTML = emojiImg(iconForHabit(habit));
   card.appendChild(icon);
 
   const timeText = habit.time
-    ? `${habit.reminder ? "🔔 " : "🕒 "}${habit.time}`
+    ? `${emojiImg(habit.reminder ? "🔔" : "🕒")}${habit.time}`
     : "Dia todo";
 
   const info = document.createElement("button");
@@ -713,7 +774,7 @@ function metricsItem(habit) {
   item.className = "metrics-item";
   item.innerHTML = `
     <div class="metrics-item-header">
-      <div class="metrics-item-icon" style="background:${tintFor(habit.color)}" aria-hidden="true">${iconForHabit(habit)}</div>
+      <div class="metrics-item-icon" style="background:${tintFor(habit.color)}" aria-hidden="true">${emojiImg(iconForHabit(habit))}</div>
       <div class="metrics-item-name">${escapeHtml(habit.name)}</div>
     </div>
     <div class="metrics-item-stats">
@@ -843,7 +904,7 @@ function updateHabitChart() {
     type: "bar",
     data: {
       labels,
-      datasets: [{ data: values, backgroundColor: "#7C5CFC", borderRadius: 6, maxBarThickness: 26 }],
+      datasets: [{ data: values, backgroundColor: "#6E4CF0", borderRadius: 6, maxBarThickness: 26 }],
     },
     options: {
       responsive: true,
@@ -935,6 +996,7 @@ function initPeriodPicker() {
 let editingHabitId = null;
 let selectedColor = DEFAULT_COLOR;
 let formCategory = "tarefas";
+let formEmoji = null; // null = automático (ícone da categoria)
 let formRecurrence = new Set([0, 1, 2, 3, 4, 5, 6]);
 
 function buildPickers() {
@@ -958,6 +1020,33 @@ function buildPickers() {
     formCategory = id;
     refreshPickerSelection();
   });
+
+  // Seletor de ícone: "Automático" (segue a categoria) + grade do EMOJI_SET
+  const emojiPicker = document.getElementById("emoji-picker");
+  emojiPicker.innerHTML = "";
+  const autoBtn = document.createElement("button");
+  autoBtn.type = "button";
+  autoBtn.id = "emoji-auto-btn";
+  autoBtn.className = "emoji-option emoji-auto";
+  autoBtn.setAttribute("aria-label", "Automático: usar o ícone da categoria");
+  autoBtn.addEventListener("click", () => {
+    formEmoji = null;
+    refreshPickerSelection();
+  });
+  emojiPicker.appendChild(autoBtn);
+  for (const e of EMOJI_SET) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "emoji-option";
+    btn.dataset.emoji = e;
+    btn.setAttribute("aria-label", e);
+    btn.innerHTML = emojiImg(e);
+    btn.addEventListener("click", () => {
+      formEmoji = e;
+      refreshPickerSelection();
+    });
+    emojiPicker.appendChild(btn);
+  }
 
   const weekdayPicker = document.getElementById("weekday-picker");
   weekdayPicker.innerHTML = "";
@@ -992,12 +1081,20 @@ function refreshPickerSelection() {
   document.querySelectorAll(".color-option").forEach((b) => mark(b, b.dataset.color === selectedColor));
   refreshCategoryPicker("category-picker", formCategory);
   document.querySelectorAll("#weekday-picker .weekday-option").forEach((b, i) => mark(b, formRecurrence.has(i)));
+
+  // Botão "Automático" mostra o ícone da categoria selecionada no momento
+  const autoBtn = document.getElementById("emoji-auto-btn");
+  const cat = categoryById(formCategory);
+  autoBtn.innerHTML = emojiImg(cat ? cat.icon : "✅");
+  mark(autoBtn, formEmoji === null);
+  document.querySelectorAll("#emoji-picker .emoji-option[data-emoji]").forEach((b) => mark(b, b.dataset.emoji === formEmoji));
 }
 
 function openModal(habit) {
   editingHabitId = habit ? habit.id : null;
   selectedColor = habit ? habit.color : DEFAULT_COLOR;
   formCategory = habit ? habit.category : "tarefas";
+  formEmoji = habit && habit.emoji ? habit.emoji : null;
   formRecurrence = habit && habit.recurrence && habit.recurrence.length ? new Set(habit.recurrence) : new Set([0, 1, 2, 3, 4, 5, 6]);
 
   document.getElementById("modal-title").textContent = habit ? "Editar hábito" : "Novo hábito";
@@ -1028,13 +1125,14 @@ async function handleSubmit(e) {
 
   if (editingHabitId) {
     const habit = store.data.habits.find((h) => h.id === editingHabitId);
-    Object.assign(habit, { name, color: selectedColor, category: formCategory, recurrence, time, reminder });
+    Object.assign(habit, { name, color: selectedColor, category: formCategory, emoji: formEmoji, recurrence, time, reminder });
   } else {
     store.data.habits.push({
       id: crypto.randomUUID(),
       name,
       color: selectedColor,
       category: formCategory,
+      emoji: formEmoji,
       recurrence,
       time,
       reminder,
@@ -1074,7 +1172,7 @@ function renderLibrary() {
     btn.className = "library-item" + (already ? " added" : "");
     btn.setAttribute("aria-label", already ? `${preset.name} (já adicionado)` : `Adicionar ${preset.name}`);
     btn.innerHTML = `
-      <div class="lib-icon" style="background:${tintFor(migrateColor(preset.color))}" aria-hidden="true">${iconForHabit(preset)}</div>
+      <div class="lib-icon" style="background:${tintFor(migrateColor(preset.color))}" aria-hidden="true">${emojiImg(iconForHabit(preset))}</div>
       <div class="lib-name">${preset.name}</div>
       <div class="lib-add" aria-hidden="true">${already ? "✓" : "+"}</div>
     `;
@@ -1085,6 +1183,7 @@ function renderLibrary() {
         name: preset.name,
         color: migrateColor(preset.color),
         category: preset.category,
+        emoji: preset.emoji,
         recurrence: [0, 1, 2, 3, 4, 5, 6],
         time: null,
         reminder: false,
@@ -1164,7 +1263,10 @@ function onTimerTick(remaining) {
   const progress = 1 - remaining / (forestState.plannedMinutes * 60);
   const stage = progress >= 2 / 3 ? "🌳" : progress >= 1 / 3 ? "🌿" : "🌱";
   const treeEl = document.getElementById("forest-tree");
-  if (treeEl.textContent !== stage) treeEl.textContent = stage;
+  if (treeEl.dataset.stage !== stage) {
+    treeEl.dataset.stage = stage;
+    treeEl.innerHTML = emojiImg(stage);
+  }
 }
 
 // ---- Ciclo de vida da sessão
@@ -1173,8 +1275,10 @@ function startForestSession(categoryId, minutes) {
   forestState = { running: true, category: categoryId, plannedMinutes: minutes, startedAt: Date.now() };
   forestPhase = "running";
   const cat = categoryById(categoryId);
-  document.getElementById("forest-session-label").textContent = `${cat.icon} ${cat.label} — ${minutes} min`;
-  document.getElementById("forest-tree").textContent = "🌱";
+  document.getElementById("forest-session-label").innerHTML = `${emojiImg(cat.icon)} ${cat.label} — ${minutes} min`;
+  const treeEl = document.getElementById("forest-tree");
+  treeEl.dataset.stage = "🌱";
+  treeEl.innerHTML = emojiImg("🌱");
   document.getElementById("forest-countdown").textContent = formatDuration(minutes * 60);
   startTicker(minutes * 60);
   renderForest();
@@ -1247,10 +1351,10 @@ function renderForestGrid(sessions) {
   section.hidden = sessions.length === 0;
   emptyEl.hidden = sessions.length > 0;
   if (totalGeral === 0) {
-    emptyEl.innerHTML = "Sua floresta está vazia.<br>Plante a primeira árvore acima. 🌱";
+    emptyEl.innerHTML = `Sua floresta está vazia.<br>Plante a primeira árvore acima. ${emojiImg("🌱")}`;
   } else if (sessions.length === 0) {
     const cat = categoryById(forestFilter);
-    emptyEl.textContent = `Nenhuma árvore em ${cat ? cat.label : forestFilter} ainda. 🌱`;
+    emptyEl.innerHTML = `Nenhuma árvore em ${cat ? cat.label : "esta categoria"} ainda. ${emojiImg("🌱")}`;
   }
   grid.innerHTML = "";
 
@@ -1262,7 +1366,7 @@ function renderForestGrid(sessions) {
     const cell = document.createElement("span");
     cell.className = "tree" + (dead ? " dead" : "");
     cell.style.background = cat ? cat.tint : "#F1EEFB";
-    cell.textContent = "🌳";
+    cell.innerHTML = emojiImg("🌳");
     cell.setAttribute("role", "img");
     const when = new Date(s.endedAt).toLocaleDateString("pt-BR");
     const desc = `${cat ? cat.label : s.category}, ${s.plannedMinutes} min, ${dead ? "morta" : "completa"}, ${when}, +${s.xp} XP`;
@@ -1283,7 +1387,7 @@ function renderForest() {
   const cat = categoryById(forestFilter);
   const escopo = cat ? ` em ${cat.label}` : "";
   document.getElementById("forest-xp-summary").innerHTML = `
-    <div class="big">⭐ ${totalXP} XP</div>
+    <div class="big">${emojiImg("⭐")} ${totalXP} XP</div>
     <div class="label">${alive} árvore${alive === 1 ? "" : "s"} viva${alive === 1 ? "" : "s"} · ${dead} morta${dead === 1 ? "" : "s"}${escopo}</div>
   `;
 
@@ -1293,7 +1397,7 @@ function renderForest() {
 
   if (forestPhase === "result" && forestResult) {
     const completed = forestResult.status === "completed";
-    document.getElementById("forest-result-icon").textContent = completed ? "🌳" : "🥀";
+    document.getElementById("forest-result-icon").innerHTML = emojiImg(completed ? "🌳" : "🥀");
     document.getElementById("forest-result-title").textContent = completed
       ? "Sua árvore cresceu!"
       : "Sua árvore morreu…";
@@ -1568,6 +1672,25 @@ if ("serviceWorker" in navigator) {
   ok(p && Array.isArray(p.forest.sessions) && p.forest.totalXP === 0,
     "parseState cria forest quando ausente");
 
+  // Completions corrompidas: valores não-array são descartados, ids não-string filtrados
+  const pc = parseState('{"habits":[],"completions":{"2026-06-15":5,"2026-06-14":["a",7],"2026-06-13":"x"}}');
+  ok(pc && pc.completions["2026-06-15"] === undefined && pc.completions["2026-06-13"] === undefined,
+    "completions com valor não-array é descartada");
+  ok(pc && pc.completions["2026-06-14"].length === 1 && pc.completions["2026-06-14"][0] === "a",
+    "completions filtra ids não-string");
+  ok(isDoneOn(pc.completions, "2026-06-15", "a") === false,
+    "isDoneOn não quebra após normalização de completions corrompidas");
+
+  // Recurrence corrompida: não-array vira [] (= diário) e índices inválidos saem
+  ok(normalizeRecurrence("lixo").length === 0 && normalizeRecurrence(null).length === 0,
+    "recurrence não-array vira [] (diário)");
+  const nr = normalizeRecurrence([0, 3, 9, -1, "2", 6]);
+  ok(nr.length === 3 && nr[0] === 0 && nr[1] === 3 && nr[2] === 6,
+    "recurrence filtra índices fora de 0–6 e não-inteiros");
+  const pr = parseState('{"habits":[{"id":"1","name":"X","category":"saude","recurrence":"seg"}]}');
+  ok(pr && Array.isArray(pr.habits[0].recurrence) && isScheduled(pr.habits[0].recurrence, monday),
+    "hábito com recurrence corrompida volta a aparecer todos os dias");
+
   // Migração de categorias antigas → novas (4 casos)
   ok(migrateCategory("habito") === "tarefas", "migração: habito → tarefas");
   ok(migrateCategory("saude") === "saude", "migração: saude → saude");
@@ -1628,6 +1751,20 @@ if ("serviceWorker" in navigator) {
   ok(iconForHabit({ category: "financeiro" }) === "💰", "ícone derivado sem campo icon");
   ok(iconForHabit({ category: "ingles" }) === categoryById("ingles").icon,
     "derivação usa a mesma fonte da Floresta (categoryById)");
+
+  // Emojis por imagem (JoyPixels): nomes de arquivo por codepoint
+  ok(emojiFile("❤️") === "2764.png", "emojiFile remove o variation selector FE0F");
+  ok(emojiFile("💰") === "1f4b0.png", "emojiFile de codepoint único (par substituto)");
+  ok(emojiImg("💰").includes('src="emoji/1f4b0.png"'), "emojiImg aponta para o PNG local");
+  ok(EMOJI_SET.every((e, i) => EMOJI_SET.indexOf(e) === i), "EMOJI_SET não tem duplicatas");
+
+  // Emoji escolhido pelo usuário tem prioridade; inválido cai na categoria
+  ok(iconForHabit({ category: "saude", emoji: "🏃" }) === "🏃", "emoji escolhido vence o da categoria");
+  ok(iconForHabit({ category: "saude", emoji: "xx" }) === "❤️", "emoji fora do conjunto cai no da categoria");
+  ok(iconForHabit({ category: "saude", emoji: null }) === "❤️", "emoji null usa o da categoria");
+  const pemoji = parseState('{"habits":[{"id":"1","name":"X","category":"saude","emoji":"🏃"},{"id":"2","name":"Y","category":"saude","emoji":"zzz"}]}');
+  ok(pemoji && pemoji.habits[0].emoji === "🏃" && pemoji.habits[1].emoji === null,
+    "parseState valida o campo emoji (mantém válido, zera inválido)");
 
   // Migração de cor: 6 tons antigos → 4 novos (roxo/azul/rosa → amarelo)
   ok(migrateColor("#7C5CFC") === "#EAB308", "cor: roxo → amarelo");

@@ -17,7 +17,7 @@
   <header class="app-header">
     <span class="icon-btn spacer"></span>
     <h1 id="day-title">Hoje</h1>
-    <button id="library-btn" class="icon-btn" aria-label="Biblioteca de hábitos">📚</button>
+    <button id="library-btn" class="icon-btn" aria-label="Biblioteca de hábitos"><img class="emoji" src="emoji/1f4da.png" alt=""></button>
   </header>
 
   <div class="day-strip" id="day-strip" role="group" aria-label="Dias da semana"></div>
@@ -26,7 +26,7 @@
     <div class="category-chips" id="category-chips" role="group" aria-label="Filtrar por categoria"></div>
     <section id="habit-list" aria-label="Hábitos do dia"></section>
     <p id="empty-state" class="empty-state" hidden>
-      Nenhum hábito por aqui.<br>Toque em "+" ou na 📚 para adicionar.
+      Nenhum hábito por aqui.<br>Toque em "+" ou na <img class="emoji" src="emoji/1f4da.png" alt="biblioteca"> para adicionar.
     </p>
   </main>
 
@@ -45,7 +45,7 @@
     <div id="progress-summary" class="metrics-summary"></div>
 
     <div id="charts-area" class="progress-section" hidden>
-      <h2 class="progress-section-title">📈 Histórico</h2>
+      <h2 class="progress-section-title"><img class="emoji" src="emoji/1f4c8.png" alt=""> Histórico</h2>
       <div class="period-picker" role="group" aria-label="Período dos gráficos">
         <button type="button" class="period-option selected" data-period="semana" aria-pressed="true">Semana</button>
         <button type="button" class="period-option" data-period="mes" aria-pressed="false">Mês</button>
@@ -61,7 +61,7 @@
         </div>
       </div>
       <div id="chart-card-focus" class="chart-card" hidden>
-        <h3 class="chart-card-title">🌲 Foco por categoria (horas)</h3>
+        <h3 class="chart-card-title"><img class="emoji" src="emoji/1f332.png" alt=""> Foco por categoria (horas)</h3>
         <div class="category-chips focus-chips" id="focus-filter-chips" role="group"
              aria-label="Filtrar foco por categoria"></div>
         <div class="chart-box">
@@ -72,12 +72,12 @@
     </div>
 
     <div id="section-attention" class="progress-section" hidden>
-      <h2 class="progress-section-title">⚠️ Precisam de atenção</h2>
+      <h2 class="progress-section-title"><img class="emoji" src="emoji/26a0.png" alt=""> Precisam de atenção</h2>
       <div id="list-attention"></div>
     </div>
 
     <div id="section-ontrack" class="progress-section" hidden>
-      <h2 class="progress-section-title">✅ Em dia</h2>
+      <h2 class="progress-section-title"><img class="emoji" src="emoji/2705.png" alt=""> Em dia</h2>
       <div id="list-ontrack"></div>
     </div>
 
@@ -86,7 +86,7 @@
     </p>
 
     <div id="backup-section" class="progress-section">
-      <h2 class="progress-section-title">💾 Backup</h2>
+      <h2 class="progress-section-title"><img class="emoji" src="emoji/1f4be.png" alt=""> Backup</h2>
       <p class="backup-hint">
         Seus dados vivem só neste aparelho. Exporte um arquivo de vez em quando
         para não perder seus hábitos e sua floresta.
@@ -97,6 +97,7 @@
       </div>
       <p id="backup-status" class="backup-hint backup-status" role="status" aria-live="polite"></p>
       <input type="file" id="import-file" accept=".json,application/json" hidden>
+      <p class="credits">Emojis por <a href="https://joypixels.com/" target="_blank" rel="noopener">JoyPixels</a> (licença gratuita, uso pessoal)</p>
     </div>
   </main>
 </section>
@@ -130,14 +131,14 @@
                placeholder="Ex: 25" required>
       </div>
 
-      <button type="submit" class="btn btn-primary btn-block">🌱 Plantar árvore</button>
+      <button type="submit" class="btn btn-primary btn-block"><img class="emoji" src="emoji/1f331.png" alt=""> Plantar árvore</button>
     </form>
 
     <div id="forest-session" class="forest-panel progress-section" hidden>
       <div class="forest-tree" id="forest-tree" aria-hidden="true">🌱</div>
       <div class="forest-countdown" id="forest-countdown" role="timer" aria-label="Tempo restante">00:00</div>
       <p class="forest-session-label" id="forest-session-label"></p>
-      <p class="forest-warning">🍃 Não saia do app: se a aba for minimizada, a árvore morre.</p>
+      <p class="forest-warning"><img class="emoji" src="emoji/1f343.png" alt=""> Não saia do app: se a aba for minimizada, a árvore morre.</p>
       <button type="button" id="forest-giveup-btn" class="btn btn-danger btn-block">Desistir</button>
     </div>
 
@@ -149,12 +150,12 @@
     </div>
 
     <div id="forest-history" class="progress-section" hidden>
-      <h2 class="progress-section-title">🌳 Sua floresta</h2>
+      <h2 class="progress-section-title"><img class="emoji" src="emoji/1f333.png" alt=""> Sua floresta</h2>
       <div id="forest-grid" class="forest-grid"></div>
     </div>
 
     <p id="forest-empty" class="empty-state" hidden>
-      Sua floresta está vazia.<br>Plante a primeira árvore acima. 🌱
+      Sua floresta está vazia.<br>Plante a primeira árvore acima. <img class="emoji" src="emoji/1f331.png" alt="">
     </p>
   </main>
 </section>
@@ -162,15 +163,15 @@
 <!-- ================= BOTTOM NAV ================= -->
 <nav class="bottom-nav" aria-label="Navegação principal">
   <button type="button" class="nav-item active" data-view="rotina" aria-current="page">
-    <span class="nav-icon" aria-hidden="true">🗓️</span>
+    <span class="nav-icon" aria-hidden="true"><img class="emoji" src="emoji/1f5d3.png" alt=""></span>
     <span class="nav-label">Rotina</span>
   </button>
   <button type="button" class="nav-item" data-view="floresta" aria-current="false">
-    <span class="nav-icon" aria-hidden="true">🌳</span>
+    <span class="nav-icon" aria-hidden="true"><img class="emoji" src="emoji/1f333.png" alt=""></span>
     <span class="nav-label">Floresta</span>
   </button>
   <button type="button" class="nav-item" data-view="progresso" aria-current="false">
-    <span class="nav-icon" aria-hidden="true">📊</span>
+    <span class="nav-icon" aria-hidden="true"><img class="emoji" src="emoji/1f4ca.png" alt=""></span>
     <span class="nav-label">Progresso</span>
   </button>
 </nav>
@@ -188,6 +189,11 @@
       <fieldset class="field">
         <legend>Categoria</legend>
         <div class="category-grid" id="category-picker"></div>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Ícone</legend>
+        <div class="emoji-grid" id="emoji-picker"></div>
       </fieldset>
 
       <fieldset class="field">
